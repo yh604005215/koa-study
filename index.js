@@ -8,7 +8,7 @@ app.use(static({
 require('dotenv').config()
 
 const bodyParser = require('koa-bodyparser')
-const userRouter = require('./router/userRouter')
+const userRouter = require('./routers/userRouter')
 
 app.use(async (ctx, next) =>{
   try {

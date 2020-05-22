@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     required: true
   },
   roleType: {
-    type: Number,
+    type: String,
     require: true,
     validate: {
       validator (val) {

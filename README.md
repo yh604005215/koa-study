@@ -9,3 +9,6 @@ npm install
 ```bash
 npm run docs
 ```
+
+## .env
+环境变量配置
