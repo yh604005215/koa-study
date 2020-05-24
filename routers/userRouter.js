@@ -1,11 +1,14 @@
 const router = require('koa-router')()
 const auth = require('../middlewares/auth')
+
+const ladaimg = require('../middlewares/lodaimg')
 const { register,
-  login,
-  userInfo,
-  userList,
-  update,
-  remove } = require('../controllers/userControllers')
+        login,
+        userInfo,
+        userList,
+        update,
+        remove } = require('../controllers/userControllers')
+
 
 /**  
  * @api {post} http://localhost:5000/register 登录 
@@ -63,7 +66,7 @@ router.get('/user', auth, userInfo)
  * @apiSuccess {String} msg 错误消息
  * @apiSuccess {Object} data 当前用户的基本信息
 */
-router.put('/user/:userId', auth, update)
+router.put('/user/:userId', auth, ladaimg, update)
 
 /**  
  * @api {delete} http://localhost:5000/:userId 删除用户

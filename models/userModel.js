@@ -42,7 +42,11 @@ const userSchema = new mongoose.Schema({
   },
   avatar:{
     type: String,
-    default: `${process.env.BASEURL}/assets/img/avatar.png`
+    default: `${process.env.BASEURL}/public/assets/img/avatar.png`
+  },
+  roleState: {
+    type: Boolean,
+    default:  false
   }
 }, {
   timestamps: true

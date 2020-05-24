@@ -7,14 +7,14 @@ module.exports = async (ctx, next) => {
     jsonwebtoken.verify(token, process.env.TOKEN, ( err, data ) =>{
       if ( err ) {
         ctx.status = 401
-        ctx.body = '身份校验失败'
+        ctx.body = { code: -1, msg:'身份校验失败,请重新登录'}
         return
       }   
       ctx.auth = data
     })
   } else {
     ctx.status = 401
-    ctx.body = '请携带token'
+    ctx.body = { code: -1, msg: '请携带token' }
     return 
   }
   if(ctx.auth) {

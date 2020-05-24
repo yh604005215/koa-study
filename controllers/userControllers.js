@@ -1,5 +1,6 @@
 const UserModel = require('../models/userModel')
 const jsonwebtoken = require('jsonwebtoken')
+
 //注册
 exports.register = async ctx => {
   const { userName, roleType } = ctx.request.body
@@ -10,11 +11,10 @@ exports.register = async ctx => {
     return
   }
   const roleName = ['小编', '管理员', '超级管理员']
-  console.log({...ctx.request.body, roleName: roleName[roleType]});
   
   await UserModel.create({...ctx.request.body, roleName: roleName[roleType - 1]})
 
-  ctx.body = '注册成功'
+  ctx.body = { code: 0, msg: '注册成功' }
 }
 
 //登录
@@ -25,6 +25,12 @@ exports.login = async ctx => {
     ctx.body = {code: -1, msg:"用户名或密码不正确"}
     return
   }
+
+  if ( !data.roleState ) {
+    ctx.body = {code: -1, msg:"账号未启用,请找管理员开启"}
+    return
+  }
+
 
   const token = jsonwebtoken.sign({
     userId: data._id
@@ -46,22 +52,23 @@ exports.userInfo = async ctx => {
 
 //获取用户列表
 exports.userList = async ctx => {
-  const { userId, pageNum = 1, pageSize = 5, nickName } = ctx.request.body
+  const { userId, pageNum = 1, pageSize = 5, nickName } = ctx.query
+  
   const {roleType} = await UserModel.findOne({_id: userId})
 
-  if ( roleType <= 2 ) {
+  if ( roleType < 2 ) {
     ctx.body = { code: -1, msg: "权限等级不够" }
     return
   }
 
-  const data = await UserModel.find({userName: new RegExp(nickName)})
+  const data = await UserModel.find({userName: new RegExp(nickName)},{password:0})
     .populate('userId', 'userName')
     .skip((pageNum - 1) * pageSize)
     .limit( ~~pageSize )
 
   const total = await UserModel.find({userName: new RegExp(nickName)}).countDocuments()
   const totalPage = Math.ceil(total / pageSize)
-  ctx.body = {code: 0, msg: "成功", data:{list: data, totalPage}}
+  ctx.body = {code: 0, msg: "成功", data:{list: data, totalPage, total}}
 }
 
 // 修改用户信息
@@ -70,12 +77,17 @@ exports.update = async ctx =>{
   const roleId = ctx.auth.userId
   const {roleType} = await UserModel.findOne({_id: roleId})
 
-  if ( roleType <= 2 ) {
+  if ( userId !== roleId && roleType < 2 ) {
     ctx.body = { code: -1, msg: "权限等级不够" }
     return
   }
-
+  
   await UserModel.updateOne({_id:userId}, ctx.request.body)
+
+  if (ctx.request.body.avatar) {  
+    ctx.body = {code: 0, msg: "头像修改成功",avatar:ctx.request.body.avatar}
+    return
+  }
 
   ctx.body = {code: 0, msg: "修改成功"}
 }
@@ -86,7 +98,7 @@ exports.remove = async ctx => {
   const roleId = ctx.auth.userId
   const {roleType} = await UserModel.findOne({_id: roleId})
 
-  if ( roleType <= 2 ) {
+  if ( roleType < 2 ) {
     ctx.body = { code: -1, msg: "权限等级不够" }
     return
   }
